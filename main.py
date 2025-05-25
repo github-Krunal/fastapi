@@ -1,7 +1,9 @@
 from typing import Union
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
 from database import categoryCollection
 from model.category import Category
+import shutil
+import os
 
 app = FastAPI()
 
@@ -24,3 +26,14 @@ async def get_all_categories():
         item["_id"] = str(item["_id"])  # Convert ObjectId to string
         categories.append(item)
     return categories
+
+@app.post("/upload-image/")
+async def upload_image(file: UploadFile = File(...)):
+    folder = "images"
+    os.makedirs(folder, exist_ok=True)  # Create folder if it doesn't exist
+    file_location = f"images/{file.filename}"
+    
+    with open(file_location, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    return {"fileurl": file_location, "message": "Image uploaded successfully"}

@@ -2,4 +2,3 @@
 from pydantic import BaseModel
 class Category(BaseModel):
     Name: str
-    Type:str
