@@ -49,7 +49,7 @@ async def delete_category(category_id: str):
         raise HTTPException(status_code=404, detail="Category not found")
     
 
-@app.post("/api/upload-image/")
+@app.post("/api/uploadImage/")
 async def upload_image(file: UploadFile = File(...)):
     folder = "images"
     os.makedirs(folder, exist_ok=True)  # Create folder if it doesn't exist
