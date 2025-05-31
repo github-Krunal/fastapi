@@ -7,6 +7,7 @@ import shutil
 import os
 from fastapi.middleware.cors import CORSMiddleware
 from bson import ObjectId
+from datetime import datetime
 
 app = FastAPI()
 
@@ -53,7 +54,8 @@ async def delete_category(category_id: str):
 async def upload_image(file: UploadFile = File(...)):
     folder = "images"
     os.makedirs(folder, exist_ok=True)  # Create folder if it doesn't exist
-    file_location = f"images/{file.filename}"
+    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    file_location = f"images/{file.filename}_{timestamp}"
     
     with open(file_location, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
