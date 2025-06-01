@@ -1,5 +1,5 @@
 from typing import Union
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException,Request
 from database import categoryCollection,offerBannerCollection
 from model.banner import OfferBanner
 from model.category import Category
@@ -8,8 +8,11 @@ import os
 from fastapi.middleware.cors import CORSMiddleware
 from bson import ObjectId
 from datetime import datetime
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
+
+app.mount("/images", StaticFiles(directory="images"), name="images")
 
 # Allow all origins (not recommended for production)
 app.add_middleware(
@@ -54,8 +57,11 @@ async def delete_category(category_id: str):
 async def upload_image(file: UploadFile = File(...)):
     folder = "images"
     os.makedirs(folder, exist_ok=True)  # Create folder if it doesn't exist
+    original_filename = file.filename
+    name, ext = os.path.splitext(original_filename)
     timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    file_location = f"images/{file.filename}_{timestamp}"
+    new_filename = f"{name}_{timestamp}{ext}"
+    file_location = os.path.join(folder, new_filename)
     
     with open(file_location, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
@@ -70,10 +76,12 @@ async def create_banner_item(offerBanner: OfferBanner):
    return {"id": str(result.inserted_id), "message": "Category created"}
 
 @app.get("/api/bannerOffer/")
-async def get_all_bannerOffer():
+async def get_all_bannerOffer(request: Request):
     bannerOffer = []
+    server_url = str(request.base_url)
     for item in offerBannerCollection.find():
         item["_id"] = str(item["_id"])  # Convert ObjectId to string
+        item['ImageURL']=server_url +item["ImageURL"]
         bannerOffer.append(item)
     return bannerOffer
 

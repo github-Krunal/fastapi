@@ -3,4 +3,4 @@ from pydantic import BaseModel
 class OfferBanner(BaseModel):
     ImageURL: str
     OfferName: str
-    RouteURL: str
+    RouteURL: str="/"
