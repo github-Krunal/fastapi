@@ -1,6 +1,6 @@
 from typing import Union
 from fastapi import FastAPI, File, UploadFile, HTTPException,Request
-from database import categoryCollection,offerBannerCollection
+from database import db,categoryCollection,offerBannerCollection,repositoyDefinationCollection
 from model.banner import OfferBanner
 from model.category import Category
 import shutil
@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from bson import ObjectId
 from datetime import datetime
 from fastapi.staticfiles import StaticFiles
+from model.repository import RepositoyDefination
 
 app = FastAPI()
 
@@ -92,3 +93,39 @@ async def delete_category(bannerOffer_id: str):
         return {"message": "Category deleted successfully"}
     else:
         raise HTTPException(status_code=404, detail="Category not found")
+    
+# respository
+@app.post("/api/repository")
+async def create_repository(repositoyDefination: RepositoyDefination):
+   repositoyDefination_dict = repositoyDefination.dict()  # 👈 Convert to dict
+   result = repositoyDefinationCollection.insert_one(repositoyDefination_dict)
+   message=await create_empty_collection(repositoyDefination.RepositoryName)
+   return {"id": str(result.inserted_id), "message": message}
+
+async def create_empty_collection(name: str):
+    collections = db.list_collection_names()
+    if name in collections:
+        return f"Collection '{name}' already exists"
+
+    db.create_collection(name)  # ✅ Sync call
+    return f"Collection '{name}' created"
+
+# GET: Fetch all categories
+@app.get("/api/repository-list/")
+async def get_all_repositories():
+    repositories = []
+    for item in repositoyDefinationCollection.find():
+        item["_id"] = str(item["_id"])  # Convert ObjectId to string
+        repositories.append(item)
+    return repositories
+
+@app.delete("/api/delete-repository/{repositoryID}")
+async def delete_repository(repositoryID: str):
+    object_id = ObjectId(repositoryID)
+    collection = repositoyDefinationCollection.find_one({"_id": object_id})  # ❌ no await
+    if collection:
+        repositoyDefinationCollection.delete_one({"_id": object_id})
+        db.drop_collection(collection["RepositoryName"])  # keep await if using Motor
+        return {"message": "Repository deleted successfully"}
+    else:
+        raise HTTPException(status_code=404, detail="Repository not found")

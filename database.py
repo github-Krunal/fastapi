@@ -9,3 +9,4 @@ client = MongoClient("mongodb://localhost:27017/")
 db = client["codeInnovator"]
 categoryCollection = db["category"]
 offerBannerCollection = db["offerBanner"]
+repositoyDefinationCollection = db["repositoyDefination"]
