@@ -146,3 +146,14 @@ async def update_repository_defination(repositoryID: str, fieldDefination: List[
         raise HTTPException(status_code=404, detail="Repository not found")
 
     return "fieldDefination updated successfully"
+
+# single repository list
+@app.get("/api/repository-list/{repositoryID}")
+async def single_respository(repositoryID: str):
+    object_id = ObjectId(repositoryID)
+    record = repositoyDefinationCollection.find_one({"_id": object_id})
+    if record:
+         record["_id"] = str(record["_id"])  # ✅ Make it JSON serializable
+         return record
+    else:
+        raise HTTPException(status_code=404, detail="Repository not found")
