@@ -9,7 +9,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from bson import ObjectId
 from datetime import datetime
 from fastapi.staticfiles import StaticFiles
+from model.fieldDefination import FieldDefination
 from model.repository import RepositoyDefination
+from typing import List
 
 app = FastAPI()
 
@@ -129,3 +131,18 @@ async def delete_repository(repositoryID: str):
         return {"message": "Repository deleted successfully"}
     else:
         raise HTTPException(status_code=404, detail="Repository not found")
+    
+# field Defination
+@app.post("/api/fieldDefination-update/{repositoryID}")
+async def update_repository_defination(repositoryID: str, fieldDefination: List[FieldDefination]):
+    # fieldDefination_dict = fieldDefination.dict()  # 👈 Convert to dict
+    field_def_list = [f.dict() for f in fieldDefination]
+    result =  repositoyDefinationCollection.update_one(
+        {"_id": ObjectId(repositoryID)},
+        {"$set": {"FieldDefination": field_def_list}}
+    )
+
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Repository not found")
+
+    return "fieldDefination updated successfully"
