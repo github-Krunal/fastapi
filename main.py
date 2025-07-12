@@ -13,6 +13,8 @@ from model.fieldDefination import FieldDefination
 from model.repository import RepositoyDefination
 from typing import List
 
+from model.saveFramework import SaveFrameworkObject
+
 app = FastAPI()
 
 app.mount("/images", StaticFiles(directory="images"), name="images")
@@ -101,7 +103,7 @@ async def delete_category(bannerOffer_id: str):
 async def create_repository(repositoyDefination: RepositoyDefination):
    repositoyDefination_dict = repositoyDefination.dict()  # 👈 Convert to dict
    result = repositoyDefinationCollection.insert_one(repositoyDefination_dict)
-   message=await create_empty_collection(repositoyDefination.RepositoryName)
+   message=await create_empty_collection(repositoyDefination.repositoryName)
    return {"id": str(result.inserted_id), "message": message}
 
 async def create_empty_collection(name: str):
@@ -127,7 +129,7 @@ async def delete_repository(repositoryID: str):
     collection = repositoyDefinationCollection.find_one({"_id": object_id})  # ❌ no await
     if collection:
         repositoyDefinationCollection.delete_one({"_id": object_id})
-        db.drop_collection(collection["RepositoryName"])  # keep await if using Motor
+        db.drop_collection(collection["repositoryName"])  # keep await if using Motor
         return {"message": "Repository deleted successfully"}
     else:
         raise HTTPException(status_code=404, detail="Repository not found")
@@ -139,7 +141,7 @@ async def update_repository_defination(repositoryID: str, fieldDefination: List[
     field_def_list = [f.dict() for f in fieldDefination]
     result =  repositoyDefinationCollection.update_one(
         {"_id": ObjectId(repositoryID)},
-        {"$set": {"FieldDefination": field_def_list}}
+        {"$set": {"fieldDefination": field_def_list}}
     )
 
     if result.matched_count == 0:
@@ -155,5 +157,18 @@ async def single_respository(repositoryID: str):
     if record:
          record["_id"] = str(record["_id"])  # ✅ Make it JSON serializable
          return record
+    else:
+        raise HTTPException(status_code=404, detail="Repository not found")
+
+# save Record
+@app.post("/api/saveRecord")
+async def save_record(saveFrameworkObject: SaveFrameworkObject):
+    object_id = ObjectId(saveFrameworkObject.repositoryID)
+    repositoyDefination:RepositoyDefination = repositoyDefinationCollection.find_one({"_id": object_id})
+    if repositoyDefination:
+         collection_name = repositoyDefination["repositoryName"]  # ✅ access as dict
+         collection = db[collection_name]  # dynamic collection
+         result = collection.insert_one(saveFrameworkObject.record)
+         return {"id": str(result.inserted_id), "message": "Record added"}
     else:
         raise HTTPException(status_code=404, detail="Repository not found")
