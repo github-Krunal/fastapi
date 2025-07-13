@@ -175,7 +175,7 @@ async def save_record(saveFrameworkObject: SaveFrameworkObject):
     
 
 @app.get("/api/record/{repositoryID}")
-async def record_record(repositoryID: str):
+async def get_record(repositoryID: str):
     object_id = ObjectId(repositoryID)
 
     repositoyDefination =  repositoyDefinationCollection.find_one({"_id": object_id})
