@@ -172,3 +172,25 @@ async def save_record(saveFrameworkObject: SaveFrameworkObject):
          return {"id": str(result.inserted_id), "message": "Record added"}
     else:
         raise HTTPException(status_code=404, detail="Repository not found")
+    
+
+@app.get("/api/record/{repositoryID}")
+async def record_record(repositoryID: str):
+    object_id = ObjectId(repositoryID)
+
+    repositoyDefination =  repositoyDefinationCollection.find_one({"_id": object_id})
+    
+    if not repositoyDefination:
+        raise HTTPException(status_code=404, detail="Repository not found")
+
+    collection_name = repositoyDefination["repositoryName"]
+    collection = db[collection_name]
+
+    # Correct way to fetch and return all records
+    cursor = collection.find()
+    records = []
+    for doc in cursor:
+        doc["_id"] = str(doc["_id"])  # convert ObjectId to string
+        records.append(doc)
+
+    return records
