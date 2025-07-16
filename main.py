@@ -1,6 +1,6 @@
 from typing import Union
 from fastapi import FastAPI, File, UploadFile, HTTPException,Request
-from database import db,categoryCollection,offerBannerCollection,repositoyDefinationCollection
+from database import db,categoryCollection,offerBannerCollection,repositoyDefinationCollection,userRegistrationCollection
 from model.banner import OfferBanner
 from model.category import Category
 import shutil
@@ -10,6 +10,7 @@ from bson import ObjectId
 from datetime import datetime
 from fastapi.staticfiles import StaticFiles
 from model.fieldDefination import FieldDefination
+from model.registration import Registration
 from model.repository import RepositoyDefination
 from typing import List
 
@@ -194,3 +195,11 @@ async def get_record(repositoryID: str):
         records.append(doc)
 
     return records
+
+# save Record
+@app.post("/api/registration")
+async def save_record(registration: Registration):
+   registration_dict = registration.dict()  # 👈 Convert to dict
+   result = userRegistrationCollection.insert_one(registration_dict)
+   return {"id": str(result.inserted_id), "message": "user register created"}
+   
