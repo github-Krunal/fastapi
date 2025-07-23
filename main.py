@@ -10,6 +10,7 @@ from bson import ObjectId
 from datetime import datetime
 from fastapi.staticfiles import StaticFiles
 from model.fieldDefination import FieldDefination
+from model.login import Login
 from model.registration import Registration
 from model.repository import RepositoyDefination
 from typing import List
@@ -202,4 +203,25 @@ async def save_record(registration: Registration):
    registration_dict = registration.dict()  # 👈 Convert to dict
    result = userRegistrationCollection.insert_one(registration_dict)
    return {"id": str(result.inserted_id), "message": "user register created"}
+
+
+@app.post("/api/login")
+async def user_login(login: Login):
+    login_dict = login.dict()  # 👈 Convert to dict
+
+    # Find the user with matching email and password
+    user = userRegistrationCollection.find_one({
+        "$or": [
+            {"email": login_dict["email"]},
+            {"username": login_dict["email"]}
+        ],
+        "password": login_dict["password"]
+    })
+
+    if user:
+        return {"message": "Login successful", "id": str(user["_id"])}
+    else:
+        raise HTTPException(
+            status_code=401, detail="Invalid email or password"
+        )
    
