@@ -219,7 +219,8 @@ async def user_login(login: Login):
     })
 
     if user:
-        return {"message": "Login successful", "id": str(user["_id"])}
+        user["_id"] = str(user["_id"])
+        return {"message": "Login successful", "user":user}
     else:
         raise HTTPException(
             status_code=401, detail="Invalid email or password"
