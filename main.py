@@ -14,7 +14,7 @@ from model.login import Login
 from model.registration import Registration
 from model.repository import RepositoyDefination
 from typing import List
-
+from fastapi.responses import JSONResponse
 from model.saveFramework import SaveFrameworkObject
 
 app = FastAPI()
@@ -222,7 +222,8 @@ async def user_login(login: Login):
         user["_id"] = str(user["_id"])
         return {"message": "Login successful", "user":user}
     else:
-        raise HTTPException(
-            status_code=401, detail="Invalid email or password"
-        )
+       return JSONResponse(
+        status_code=200,
+        content={"message": "Invalid email or password"}
+    )
    
