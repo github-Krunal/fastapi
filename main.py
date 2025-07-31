@@ -119,11 +119,8 @@ async def create_empty_collection(name: str):
 # GET: Fetch all categories
 @app.get("/api/repository-list/")
 async def get_all_repositories():
-    repositories = []
-    for item in repositoyDefinationCollection.find():
-        item["_id"] = str(item["_id"])  # Convert ObjectId to string
-        repositories.append(item)
-    return repositories
+    repositories = list(repositoyDefinationCollection.find())
+    return convert_object_ids(repositories)
 
 @app.delete("/api/delete-repository/{repositoryID}")
 async def delete_repository(repositoryID: str):
@@ -157,8 +154,7 @@ async def single_respository(repositoryID: str):
     object_id = ObjectId(repositoryID)
     record = repositoyDefinationCollection.find_one({"_id": object_id})
     if record:
-         record["_id"] = str(record["_id"])  # ✅ Make it JSON serializable
-         return record
+        return convert_object_ids(record)
     else:
         raise HTTPException(status_code=404, detail="Repository not found")
 
@@ -227,3 +223,13 @@ async def user_login(login: Login):
         content={"message": "Invalid email or password"}
     )
    
+def convert_object_ids(doc):
+    if isinstance(doc, list):
+        return [convert_object_ids(i) for i in doc]
+    elif isinstance(doc, dict):
+        return {
+            key: convert_object_ids(str(value)) if isinstance(value, ObjectId) else convert_object_ids(value)
+            for key, value in doc.items()
+        }
+    else:
+        return doc
