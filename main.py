@@ -255,3 +255,26 @@ async def delete_record(repositoryID: str, recordID: str):
         raise HTTPException(status_code=404, detail="Record not found")
 
     return {"message": "Record deleted successfully"}
+
+@app.get("/api/singleRecord/{repositoryID}/{recordID}")
+async def get_single_record(repositoryID: str, recordID: str):
+    try:
+        repo_obj_id = ObjectId(repositoryID)
+        record_obj_id = ObjectId(recordID)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid ObjectId format")
+
+    # Get repository definition to determine collection
+    repositoyDefination = repositoyDefinationCollection.find_one({"_id": repo_obj_id})
+    if not repositoyDefination:
+        raise HTTPException(status_code=404, detail="Repository not found")
+
+    collection_name = repositoyDefination["repositoryName"]
+    collection = db[collection_name]
+
+    record = collection.find_one({"_id": record_obj_id})
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found")
+
+    record["_id"] = str(record["_id"])  # Convert ObjectId to string
+    return record
