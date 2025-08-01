@@ -233,3 +233,25 @@ def convert_object_ids(doc):
         }
     else:
         return doc
+    
+@app.delete("/api/deleteRecord/{repositoryID}/{recordID}")
+async def delete_record(repositoryID: str, recordID: str):
+    try:
+        repo_obj_id = ObjectId(repositoryID)
+        record_obj_id = ObjectId(recordID)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid ObjectId format")
+
+    # Get repository definition to determine collection
+    repositoyDefination = repositoyDefinationCollection.find_one({"_id": repo_obj_id})
+    if not repositoyDefination:
+        raise HTTPException(status_code=404, detail="Repository not found")
+
+    collection_name = repositoyDefination["repositoryName"]
+    collection = db[collection_name]
+
+    result = collection.delete_one({"_id": record_obj_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Record not found")
+
+    return {"message": "Record deleted successfully"}
