@@ -278,3 +278,31 @@ async def get_single_record(repositoryID: str, recordID: str):
 
     record["_id"] = str(record["_id"])  # Convert ObjectId to string
     return record
+
+
+@app.post("/api/updateRecord/")
+async def update_record(saveFrameworkObject: SaveFrameworkObject):
+    try:
+        repo_obj_id = ObjectId(saveFrameworkObject.repositoryID)
+        record_obj_id = ObjectId(saveFrameworkObject.recordID)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid ObjectId format")
+
+    # Fetch repository definition to get collection name
+    repositoyDefination = repositoyDefinationCollection.find_one({"_id": repo_obj_id})
+    if not repositoyDefination:
+        raise HTTPException(status_code=404, detail="Repository not found")
+
+    collection_name = repositoyDefination["repositoryName"]
+    collection = db[collection_name]
+
+    # Perform the update
+    result = collection.update_one(
+        {"_id": record_obj_id},
+        {"$set": saveFrameworkObject.record}
+    )
+
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Record not found")
+
+    return {"message": "Record updated successfully"}

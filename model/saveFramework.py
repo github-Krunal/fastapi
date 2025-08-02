@@ -4,5 +4,6 @@ from typing import List,Optional,Any
 from pydantic import BaseModel
 
 class SaveFrameworkObject(BaseModel):
-    repositoryID: str
+    repositoryID:Optional[str] = None
     record: Any
+    recordID: Optional[str] = None
