@@ -16,6 +16,7 @@ from model.repository import RepositoyDefination
 from typing import List
 from fastapi.responses import JSONResponse
 from model.saveFramework import SaveFrameworkObject
+from bson.errors import InvalidId
 
 app = FastAPI()
 
@@ -174,23 +175,24 @@ async def save_record(saveFrameworkObject: SaveFrameworkObject):
 
 @app.get("/api/record/{repositoryID}")
 async def get_record(repositoryID: str):
-    object_id = ObjectId(repositoryID)
+    try:
+        # Attempt to interpret as ObjectId
+        object_id = ObjectId(repositoryID)
+        query = {"_id": object_id}
+    except InvalidId:
+        # Fall back to string lookup if not a valid ObjectId
+        query = {"repositoryName": repositoryID}
 
-    repositoyDefination =  repositoyDefinationCollection.find_one({"_id": object_id})
-    
+    repositoyDefination = repositoyDefinationCollection.find_one(query)
     if not repositoyDefination:
         raise HTTPException(status_code=404, detail="Repository not found")
 
     collection_name = repositoyDefination["repositoryName"]
     collection = db[collection_name]
-
-    # Correct way to fetch and return all records
-    cursor = collection.find()
     records = []
-    for doc in cursor:
-        doc["_id"] = str(doc["_id"])  # convert ObjectId to string
+    for doc in collection.find():
+        doc["_id"] = str(doc["_id"])
         records.append(doc)
-
     return records
 
 # save Record
