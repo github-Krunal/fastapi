@@ -7,6 +7,6 @@ class FieldDefination(BaseModel):
     _id: str
     lookupRepositoryName:Optional[str] = ""
     lookupField1:Optional[str] = ""
-    lookupfield2:Optional[str] = ""
+    lookupField2:Optional[str] = ""
     
     
