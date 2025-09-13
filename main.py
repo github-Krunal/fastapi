@@ -20,7 +20,7 @@ from bson.errors import InvalidId
 
 app = FastAPI()
 
-app.mount("/images", StaticFiles(directory="images"), name="images")
+app.mount("/attachments", StaticFiles(directory="attachments"), name="attachments")
 
 # Allow all origins (not recommended for production)
 app.add_middleware(
@@ -61,9 +61,9 @@ async def delete_category(category_id: str):
         raise HTTPException(status_code=404, detail="Category not found")
     
 
-@app.post("/api/uploadImage/")
-async def upload_image(file: UploadFile = File(...)):
-    folder = "images"
+@app.post("/api/uploadAttachment/")
+async def upload_attachment(file: UploadFile = File(...)):
+    folder = "attachments"
     os.makedirs(folder, exist_ok=True)  # Create folder if it doesn't exist
     original_filename = file.filename
     name, ext = os.path.splitext(original_filename)
