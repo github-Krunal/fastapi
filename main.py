@@ -17,8 +17,13 @@ from typing import List
 from fastapi.responses import JSONResponse
 from model.saveFramework import SaveFrameworkObject
 from bson.errors import InvalidId
+import urllib.parse
 
 app = FastAPI()
+
+# Ensure "attachments" folder exists
+if not os.path.exists("attachments"):
+    os.makedirs("attachments")
 
 app.mount("/attachments", StaticFiles(directory="attachments"), name="attachments")
 
@@ -75,6 +80,18 @@ async def upload_attachment(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
         
     return {"fileurl": file_location, "message": "Image uploaded successfully"}
+
+@app.delete("/api/deleteAttachment/{filename}")
+async def delete_attachment(filename: str):
+    folder = "attachments"
+    decoded_filename = urllib.parse.unquote(filename)
+    file_path = os.path.join(folder, decoded_filename)
+
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        return {"message": f"Attachment '{decoded_filename}' deleted successfully"}
+    else:
+        raise HTTPException(status_code=404, detail="File not found")
 
 # banner slider
 @app.post("/api/bannerOffer/")
