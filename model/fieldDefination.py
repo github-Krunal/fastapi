@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional,List
 class FieldDefination(BaseModel):
     formControlName: str
     displayName: str
@@ -8,5 +8,6 @@ class FieldDefination(BaseModel):
     lookupRepositoryName:Optional[str] = ""
     lookupField1:Optional[str] = ""
     lookupField2:Optional[str] = ""
+    options: Optional[List[str]] = []
     
     
