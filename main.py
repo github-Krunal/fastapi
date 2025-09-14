@@ -14,7 +14,7 @@ from model.login import Login
 from model.registration import Registration
 from model.repository import RepositoyDefination
 from typing import List
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse,FileResponse
 from model.saveFramework import SaveFrameworkObject
 from bson.errors import InvalidId
 import urllib.parse
@@ -80,6 +80,24 @@ async def upload_attachment(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
         
     return {"fileurl": file_location, "message": "Image uploaded successfully"}
+
+@app.get("/api/downloadAttachment/{filename}")
+async def download_attachment(filename: str):
+    folder = "attachments"
+    # Decode %20 etc. to actual filename
+    decoded_filename = urllib.parse.unquote(filename)
+    file_path = os.path.join(folder, decoded_filename)
+
+    if os.path.exists(file_path):
+        # `filename` parameter makes browser download instead of display
+        return FileResponse(
+            path=file_path,
+            filename=decoded_filename,
+            media_type="application/octet-stream"
+        )
+    else:
+        raise HTTPException(status_code=404, detail="File not found")
+    
 
 @app.delete("/api/deleteAttachment/{filename}")
 async def delete_attachment(filename: str):
