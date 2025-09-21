@@ -231,13 +231,6 @@ async def get_record(repositoryID: str):
         records.append(doc)
     return records
 
-# # save Record
-# @app.post("/api/registration")
-# async def save_record(registration: Registration):
-#    registration_dict = registration.dict()  # 👈 Convert to dict
-#    result = userRegistrationCollection.insert_one(registration_dict)
-#    return {"id": str(result.inserted_id), "message": "user register created"}
-
 
 @app.post("/api/login")
 async def user_login(login: Login):
