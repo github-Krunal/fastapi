@@ -18,6 +18,7 @@ from fastapi.responses import JSONResponse,FileResponse
 from model.saveFramework import SaveFrameworkObject
 from bson.errors import InvalidId
 import urllib.parse
+from routes import auth_routes
 
 app = FastAPI()
 
@@ -36,7 +37,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+app.include_router(auth_routes.router)
 
 @app.get("/")
 def read_root():
@@ -230,12 +231,12 @@ async def get_record(repositoryID: str):
         records.append(doc)
     return records
 
-# save Record
-@app.post("/api/registration")
-async def save_record(registration: Registration):
-   registration_dict = registration.dict()  # 👈 Convert to dict
-   result = userRegistrationCollection.insert_one(registration_dict)
-   return {"id": str(result.inserted_id), "message": "user register created"}
+# # save Record
+# @app.post("/api/registration")
+# async def save_record(registration: Registration):
+#    registration_dict = registration.dict()  # 👈 Convert to dict
+#    result = userRegistrationCollection.insert_one(registration_dict)
+#    return {"id": str(result.inserted_id), "message": "user register created"}
 
 
 @app.post("/api/login")
