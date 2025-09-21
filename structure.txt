@@ -12,9 +12,8 @@ project/
 │   ├── routes/              # API endpoints
 │   │   ├── category_routes.py
 │   │   
-│   │
-│   ├── utils/               # Helpers
-│   │   ├── objectid.py
+│   │---constant
+|   |    |-- api_constant.py
 │   │
 │   │
 │   ├── database.py          # MongoDB connection
