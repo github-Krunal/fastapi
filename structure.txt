@@ -1,0 +1,23 @@
+project/
+│── main.py
+│── app/
+│   ├── models/              # Pydantic models
+│   │   ├── category.py
+│   │   
+│   │
+│   ├── controllers/         # Business logic
+│   │   ├── category_controller.py
+│   │ 
+│   │
+│   ├── routes/              # API endpoints
+│   │   ├── category_routes.py
+│   │   
+│   │
+│   ├── utils/               # Helpers
+│   │   ├── objectid.py
+│   │
+│   │
+│   ├── database.py          # MongoDB connection
+│   └── __init__.py
+│
+└── structure.txt
