@@ -232,28 +232,6 @@ async def get_record(repositoryID: str):
     return records
 
 
-@app.post("/api/login")
-async def user_login(login: Login):
-    login_dict = login.dict()  # 👈 Convert to dict
-
-    # Find the user with matching email and password
-    user = userRegistrationCollection.find_one({
-        "$or": [
-            {"email": login_dict["email"]},
-            {"username": login_dict["email"]}
-        ],
-        "password": login_dict["password"]
-    })
-
-    if user:
-        user["_id"] = str(user["_id"])
-        return {"message": "Login successful", "user":user}
-    else:
-       return JSONResponse(
-        status_code=200,
-        content={"message": "Invalid email or password"}
-    )
-   
 def convert_object_ids(doc):
     if isinstance(doc, list):
         return [convert_object_ids(i) for i in doc]
