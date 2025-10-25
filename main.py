@@ -188,8 +188,16 @@ async def update_repository_defination(repositoryID: str, fieldDefination: List[
 # single repository list
 @app.get("/api/repository-list/{repositoryID}")
 async def single_respository(repositoryID: str):
-    object_id = ObjectId(repositoryID)
-    record = repositoyDefinationCollection.find_one({"_id": object_id})
+    try:
+         # Attempt to interpret as ObjectId
+        object_id = ObjectId(repositoryID)
+        query = {"_id": object_id}
+    except:
+         # Fall back to string lookup if not a valid ObjectId
+        query = {"repositoryName": repositoryID}
+        
+    record = repositoyDefinationCollection.find_one(query)
+    print()
     if record:
         return convert_object_ids(record)
     else:
@@ -198,15 +206,26 @@ async def single_respository(repositoryID: str):
 # save Record
 @app.post("/api/saveRecord")
 async def save_record(saveFrameworkObject: SaveFrameworkObject):
-    object_id = ObjectId(saveFrameworkObject.repositoryID)
-    repositoyDefination:RepositoyDefination = repositoyDefinationCollection.find_one({"_id": object_id})
+    try:
+        object_id = ObjectId(saveFrameworkObject.repositoryID)
+        query = {"_id": object_id}
+    except:
+        query = {"repositoryName": saveFrameworkObject.repositoryID}
+
+    repositoyDefination: RepositoyDefination = repositoyDefinationCollection.find_one(query)
+
     if repositoyDefination:
-         collection_name = repositoyDefination["repositoryName"]  # ✅ access as dict
-         collection = db[collection_name]  # dynamic collection
-         result = collection.insert_one(saveFrameworkObject.record)
-         return {"id": str(result.inserted_id), "message": "Record added"}
+        # ✅ Access repository name and insert into dynamic collection
+        collection_name = repositoyDefination["repositoryName"]
+        collection = db[collection_name]
+        result = collection.insert_one(saveFrameworkObject.record)
+        return {
+            "id": str(result.inserted_id),
+            "message": "Record added"
+        }
     else:
         raise HTTPException(status_code=404, detail="Repository not found")
+
     
 
 @app.get("/api/record/{repositoryID}")

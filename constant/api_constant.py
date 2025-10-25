@@ -5,3 +5,4 @@ API_PREFIX = "/api"
 
 USER_REGISTRATION="/registration"
 USER_LOGIN="/login"
+RECORD="/login"
