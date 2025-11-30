@@ -13,8 +13,8 @@ def user_login(login: Login):
     # Find the user with matching email and password
     user = userRegistrationCollection.find_one({
         "$or": [
-            {"email": login_dict["email"]},
-            {"username": login_dict["email"]}
+            {"email": login_dict["username"]},
+            {"username": login_dict["username"]}
         ],
         "password": login_dict["password"]
     })

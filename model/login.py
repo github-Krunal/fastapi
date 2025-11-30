@@ -4,5 +4,5 @@ from typing import List,Optional,Any
 from pydantic import BaseModel
 
 class Login(BaseModel):
-    email: str
+    username: str
     password: str

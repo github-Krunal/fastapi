@@ -1,3 +1,4 @@
+import mimetypes
 from typing import Union
 from fastapi import FastAPI, File, UploadFile, HTTPException,Request
 from database import db,categoryCollection,offerBannerCollection,repositoyDefinationCollection,userRegistrationCollection
@@ -99,6 +100,28 @@ async def download_attachment(filename: str):
     else:
         raise HTTPException(status_code=404, detail="File not found")
     
+@app.get("/api/viewAttachment/{file_path:path}")
+async def view_attachment(file_path: str):
+    # Decode URL-encoded characters (e.g., %20 → space)
+    decoded_path = urllib.parse.unquote(file_path)
+
+    # Construct safe path relative to base folder
+    base_dir = os.getcwd()  # current working directory
+    abs_path = os.path.join(base_dir, decoded_path)
+
+    # Check file exists
+    if not os.path.exists(abs_path):
+        raise HTTPException(status_code=404, detail="File not found")
+
+    # Detect correct MIME type
+    media_type, _ = mimetypes.guess_type(abs_path)
+    if media_type is None:
+        media_type = "application/octet-stream"
+
+    return FileResponse(
+        path=abs_path,
+        media_type=media_type
+    )
 
 @app.delete("/api/deleteAttachment/{filename}")
 async def delete_attachment(filename: str):
