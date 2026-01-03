@@ -1,3 +1,7 @@
+JWT authentication installation
+1)pip install fastapi python-jose bcrypt passlib[bcrypt] uvicorn
+
+
 project/
 │── main.py
 │── app/
